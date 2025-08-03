@@ -18,5 +18,7 @@ export function useWatchlist() {
     });
   };
 
-  return { watchlist, toggleWatchlist };
+  const isInWatchlist = (coinId: string) => watchlist.includes(coinId);
+
+  return { watchlist, toggleWatchlist, isInWatchlist };
 }
