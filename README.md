@@ -1,4 +1,10 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Created as a simple but sleek dashboard that pulls live data from the CoinGecko API and makes it easy for users to:
+
+- Browse top cryptocurrencies
+- Search & filter to find specific cryptocurrencies
+- See charts & details for each coin
+- Build a little watchlist of favorites
 
 ## Getting Started
 
