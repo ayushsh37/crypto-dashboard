@@ -3,14 +3,15 @@ import { useEffect, useState } from "react";
 import { getMarkets } from "@/utils/api";
 import { useWatchlist } from "@/hooks/useWatchlist";
 import CoinTable from "@/components/CoinTable";
+import { Coin } from "@/types/coin";
 
 export default function WatchlistPage() {
   const { watchlist, toggleWatchlist } = useWatchlist();
-  const [coins, setCoins] = useState<any[]>([]);
+  const [coins, setCoins] = useState<Coin[]>([]);
 
   useEffect(() => {
-    getMarkets().then((data) =>
-      setCoins(data.filter((coin: any) => watchlist.includes(coin.id)))
+    getMarkets().then((data: Coin[]) =>
+      setCoins(data.filter((coin) => watchlist.includes(coin.id)))
     );
   }, [watchlist]);
 

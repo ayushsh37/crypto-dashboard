@@ -1,9 +1,11 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 import { Star } from "lucide-react";
+import { Coin } from "@/types/coin";
 
 interface CoinTableProps {
-  coins: any[];
+  coins: Coin[];
   watchlist: string[];
   toggleWatchlist: (id: string) => void;
 }
@@ -28,14 +30,22 @@ export default function CoinTable({ coins, watchlist, toggleWatchlist }: CoinTab
             <tr key={coin.id} className="border-b">
               <td className="p-2">{coin.market_cap_rank}</td>
               <td className="p-2 flex items-center gap-2">
-                <img src={coin.image} alt={coin.name} className="w-6 h-6" />
+                <Image
+                  src={coin.image}
+                  alt={coin.name}
+                  width={24}
+                  height={24}
+                  className="rounded-full"
+                />
                 <Link href={`/coin/${coin.id}`} className="text-blue-500 hover:underline">
                   {coin.name} ({coin.symbol.toUpperCase()})
                 </Link>
               </td>
               <td className="p-2">${coin.current_price.toLocaleString()}</td>
               <td
-                className={`p-2 ${coin.price_change_percentage_24h > 0 ? "text-green-500" : "text-red-500"}`}
+                className={`p-2 ${
+                  coin.price_change_percentage_24h > 0 ? "text-green-500" : "text-red-500"
+                }`}
               >
                 {coin.price_change_percentage_24h.toFixed(2)}%
               </td>

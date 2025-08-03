@@ -4,15 +4,16 @@ import { getMarkets } from "@/utils/api";
 import { useWatchlist } from "@/hooks/useWatchlist";
 import CoinTable from "@/components/CoinTable";
 import SearchBar from "@/components/SearchBar";
+import { Coin } from "@/types/coin";
 
 export default function Home() {
-  const [coins, setCoins] = useState<any[]>([]);
-  const [filteredCoins, setFilteredCoins] = useState<any[]>([]);
+  const [coins, setCoins] = useState<Coin[]>([]);
+  const [filteredCoins, setFilteredCoins] = useState<Coin[]>([]);
   const [search, setSearch] = useState("");
   const { watchlist, toggleWatchlist } = useWatchlist();
 
   useEffect(() => {
-    getMarkets().then(setCoins);
+    getMarkets().then((data: Coin[]) => setCoins(data));
   }, []);
 
   useEffect(() => {
