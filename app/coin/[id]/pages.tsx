@@ -2,66 +2,70 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { getCoinDetails, getCoinMarketChart } from "@/utils/api";
-import Chart from "@/components/Chart";
-import { CoinDetail, ChartPoint } from "@/types/coin";
-import Image from "next/image";
+import { CoinDetail } from "@/types/coin";
+import PriceChart from "@/components/Chart";
+import { useWatchlist } from "@/hooks/useWatchlist";
 
 export default function CoinDetailPage() {
-  const { id } = useParams();
+  const { id } = useParams() as { id: string };
+  const { toggleWatchlist, isInWatchlist } = useWatchlist();
   const [coin, setCoin] = useState<CoinDetail | null>(null);
-  const [chartData, setChartData] = useState<ChartPoint[]>([]);
+  const [chartData, setChartData] = useState<number[][]>([]);
   const [days, setDays] = useState(7);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!id) return;
-    getCoinDetails(id as string).then((data) => setCoin(data));
-  }, [id]);
-
-  useEffect(() => {
-    if (!id) return;
-    getCoinMarketChart(id as string, days).then((data) => {
-      const formatted = data.prices.map((p) => ({
-        time: new Date(p[0]).toLocaleDateString(),
-        price: p[1],
-      }));
-      setChartData(formatted);
-    });
+    setLoading(true);
+    Promise.all([getCoinDetails(id), getCoinMarketChart(id, days)])
+      .then(([details, chart]) => {
+        setCoin(details);
+        setChartData(chart.prices);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
   }, [id, days]);
 
-  if (!coin) return <p className="p-6">Loading...</p>;
+  if (loading) return <p className="p-6">Loading...</p>;
+  if (!coin) return <p className="p-6">Coin not found</p>;
 
   return (
     <main className="p-6">
-      <h1 className="text-2xl font-bold mb-4 flex items-center gap-2">
-        <Image src={coin.image.small} alt={coin.name} width={32} height={32} />
-        {coin.name} ({coin.symbol.toUpperCase()})
-      </h1>
-      <p className="mb-2">Rank: {coin.market_cap_rank}</p>
-      <p className="mb-2">Current Price: ${coin.market_data.current_price.usd.toLocaleString()}</p>
-      <p className="mb-2">Market Cap: ${coin.market_data.market_cap.usd.toLocaleString()}</p>
-      <p className="mb-2">24h Volume: ${coin.market_data.total_volume.usd.toLocaleString()}</p>
-      <p className="mb-4">
-        Supply: {coin.market_data.circulating_supply.toLocaleString()} /{" "}
-        {coin.market_data.total_supply
-          ? coin.market_data.total_supply.toLocaleString()
-          : "∞"}
-      </p>
-
-      <div className="flex gap-2 mb-4">
-        {[1, 7, 30, 90].map((range) => (
-          <button
-            key={range}
-            onClick={() => setDays(range)}
-            className={`px-3 py-1 rounded ${
-              days === range ? "bg-blue-500 text-white" : "bg-gray-200"
-            }`}
-          >
-            {range === 1 ? "24h" : `${range}d`}
-          </button>
-        ))}
+      <div className="flex items-center gap-4">
+        <img src={coin.image.small} alt={coin.name} className="w-10 h-10" />
+        <h1 className="text-2xl font-bold">
+          {coin.name} ({coin.symbol.toUpperCase()})
+        </h1>
+        <button
+          onClick={() => toggleWatchlist(coin.id)}
+          className="ml-4 text-2xl"
+        >
+          {isInWatchlist(coin.id) ? "⭐" : "☆"}
+        </button>
       </div>
 
-      <Chart data={chartData} />
+      <div className="grid grid-cols-2 gap-4 mt-4">
+        <p>Price: ${coin.market_data.current_price.usd.toLocaleString()}</p>
+        <p>Market Cap: ${coin.market_data.market_cap.usd.toLocaleString()}</p>
+        <p>24h Volume: ${coin.market_data.total_volume.usd.toLocaleString()}</p>
+        <p>Rank: #{coin.market_cap_rank}</p>
+        <p>Circulating Supply: {coin.market_data.circulating_supply.toLocaleString()}</p>
+        <p>Total Supply: {coin.market_data.total_supply?.toLocaleString() ?? "N/A"}</p>
+      </div>
+
+      <div className="mt-6">
+        <div className="flex gap-4 mb-4">
+          {[1, 7, 30, 90].map((d) => (
+            <button
+              key={d}
+              className={`px-4 py-2 rounded ${days === d ? "bg-blue-600 text-white" : "bg-gray-200"}`}
+              onClick={() => setDays(d)}
+            >
+              {d === 1 ? "24h" : `${d}d`}
+            </button>
+          ))}
+        </div>
+        <PriceChart data={chartData} />
+      </div>
     </main>
   );
 }

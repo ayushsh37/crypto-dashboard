@@ -1,69 +1,90 @@
 "use client";
 import { useEffect, useState } from "react";
 import { getMarkets } from "@/utils/api";
-import { useWatchlist } from "@/hooks/useWatchlist";
-import CoinTable from "@/components/CoinTable";
-import SearchBar from "@/components/SearchBar";
-import Filters from "@/components/Filters";
-import Pagination from "@/components/Pagination";
 import { Coin } from "@/types/coin";
-import { SortKey } from "@/types/sort";   // <-- import type here
+import CoinTable from "@/components/CoinTable";
+import { useWatchlist } from "@/hooks/useWatchlist";
 
-export default function Home() {
-  const [coins, setCoins] = useState<Coin[]>([]);
-  const [filteredCoins, setFilteredCoins] = useState<Coin[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
-  const [sortKey, setSortKey] = useState<SortKey>("market_cap_rank");
+export type SortKey = "rank" | "price" | "volume" | "change";
+
+export default function HomePage() {
   const { watchlist, toggleWatchlist } = useWatchlist();
+  const [coins, setCoins] = useState<Coin[]>([]);
+  const [search, setSearch] = useState("");
+  const [sortKey, setSortKey] = useState<SortKey>("rank");
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     setLoading(true);
-    setError("");
     getMarkets(page)
-      .then((data) => {
-        setCoins(data);
-        setLoading(false);
-      })
-      .catch(() => {
-        setError("Failed to load coins");
-        setLoading(false);
-      });
+      .then((data) => setCoins(data))
+      .finally(() => setLoading(false));
   }, [page]);
 
-  useEffect(() => {
-    const result = coins
-      .filter(
-        (coin) =>
-          coin.name.toLowerCase().includes(search.toLowerCase()) ||
-          coin.symbol.toLowerCase().includes(search.toLowerCase())
-      )
-      .sort((a, b) => {
-        if (sortKey === "market_cap_rank") return a.market_cap_rank - b.market_cap_rank;
-        if (sortKey === "price_change_percentage_24h")
-          return b.price_change_percentage_24h - a.price_change_percentage_24h;
-        if (sortKey === "total_volume") return b.total_volume - a.total_volume;
-        return 0;
-      });
-    setFilteredCoins(result);
-  }, [coins, search, sortKey]);
+  const filteredCoins = coins
+    .filter((c) =>
+      c.name.toLowerCase().includes(search.toLowerCase()) ||
+      c.symbol.toLowerCase().includes(search.toLowerCase())
+    )
+    .sort((a, b) => {
+      switch (sortKey) {
+        case "price": return b.current_price - a.current_price;
+        case "volume": return b.total_volume - a.total_volume;
+        case "change": return b.price_change_percentage_24h - a.price_change_percentage_24h;
+        default: return a.market_cap_rank - b.market_cap_rank;
+      }
+    });
 
   if (loading) return <p className="p-6">Loading...</p>;
-  if (error) return <p className="p-6 text-red-500">{error}</p>;
 
   return (
     <main className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Top Cryptocurrencies</h1>
-      <SearchBar search={search} setSearch={setSearch} />
-      <Filters sortKey={sortKey} setSortKey={setSortKey} />
-      {filteredCoins.length === 0 ? (
-        <p className="mt-4">No coins match your search.</p>
-      ) : (
-        <CoinTable coins={filteredCoins} watchlist={watchlist} toggleWatchlist={toggleWatchlist} />
-      )}
-      <Pagination page={page} totalPages={5} onPageChange={setPage} />
+      <h1 className="text-2xl font-bold mb-4">Crypto Dashboard</h1>
+
+      <div className="flex gap-4 mb-4">
+        <input
+          type="text"
+          placeholder="Search by name or symbol"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="border p-2 rounded"
+        />
+        <select
+          value={sortKey}
+          onChange={(e) => setSortKey(e.target.value as SortKey)}
+          className="border p-2 rounded"
+        >
+          <option value="rank">Rank</option>
+          <option value="price">Price</option>
+          <option value="volume">Volume</option>
+          <option value="change">24h %</option>
+        </select>
+      </div>
+
+      <CoinTable
+        coins={filteredCoins}
+        watchlist={watchlist}
+        toggleWatchlist={toggleWatchlist}
+      />
+
+      {/* Pagination */}
+      <div className="flex justify-center mt-6 gap-4">
+        <button
+          disabled={page === 1}
+          onClick={() => setPage((p) => Math.max(p - 1, 1))}
+          className="px-4 py-2 border rounded disabled:opacity-50"
+        >
+          Previous
+        </button>
+        <span className="px-4 py-2 border rounded bg-gray-100">Page {page}</span>
+        <button
+          onClick={() => setPage((p) => p + 1)}
+          className="px-4 py-2 border rounded"
+        >
+          Next
+        </button>
+      </div>
     </main>
   );
 }
