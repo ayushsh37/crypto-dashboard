@@ -31,7 +31,7 @@ export default function WatchlistPage() {
   return (
     <main className="p-6">
       <h1 className="text-2xl font-bold mb-4">My Watchlist</h1>
-      <table className="min-w-full bg-white shadow-md rounded">
+      <table className="min-w-full bg-white text-black shadow-md rounded">
         <thead>
           <tr>
             <th className="p-2 text-left">#</th>
