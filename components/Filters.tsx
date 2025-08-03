@@ -1,7 +1,9 @@
 "use client";
+import { SortKey } from "@/types/sort";
+
 interface FiltersProps {
-  sortKey: string;
-  setSortKey: (key: string) => void;
+  sortKey: SortKey;
+  setSortKey: (key: SortKey) => void;
 }
 
 export default function Filters({ sortKey, setSortKey }: FiltersProps) {
@@ -10,7 +12,7 @@ export default function Filters({ sortKey, setSortKey }: FiltersProps) {
       <select
         className="border p-2 rounded"
         value={sortKey}
-        onChange={(e) => setSortKey(e.target.value)}
+        onChange={(e) => setSortKey(e.target.value as SortKey)}
       >
         <option value="market_cap_rank">Rank</option>
         <option value="price_change_percentage_24h">24h %</option>

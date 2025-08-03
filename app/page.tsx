@@ -7,6 +7,7 @@ import SearchBar from "@/components/SearchBar";
 import Filters from "@/components/Filters";
 import Pagination from "@/components/Pagination";
 import { Coin } from "@/types/coin";
+import { SortKey } from "@/types/sort";   // <-- import type here
 
 export default function Home() {
   const [coins, setCoins] = useState<Coin[]>([]);
@@ -15,7 +16,7 @@ export default function Home() {
   const [error, setError] = useState("");
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
-  const [sortKey, setSortKey] = useState("market_cap_rank");
+  const [sortKey, setSortKey] = useState<SortKey>("market_cap_rank");
   const { watchlist, toggleWatchlist } = useWatchlist();
 
   useEffect(() => {
@@ -39,7 +40,13 @@ export default function Home() {
           coin.name.toLowerCase().includes(search.toLowerCase()) ||
           coin.symbol.toLowerCase().includes(search.toLowerCase())
       )
-      .sort((a, b) => (b as any)[sortKey] - (a as any)[sortKey]);
+      .sort((a, b) => {
+        if (sortKey === "market_cap_rank") return a.market_cap_rank - b.market_cap_rank;
+        if (sortKey === "price_change_percentage_24h")
+          return b.price_change_percentage_24h - a.price_change_percentage_24h;
+        if (sortKey === "total_volume") return b.total_volume - a.total_volume;
+        return 0;
+      });
     setFilteredCoins(result);
   }, [coins, search, sortKey]);
 
