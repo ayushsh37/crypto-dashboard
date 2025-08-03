@@ -26,13 +26,17 @@ export default function WatchlistPage() {
   if (loading) return <p className="p-6">Loading watchlist...</p>;
 
   if (!coins.length)
-    return <p className="p-6">No coins in watchlist. ⭐ some on homepage first!</p>;
+    return (
+      <p className="p-6">
+        No coins in watchlist. ⭐ some on homepage first!
+      </p>
+    );
 
   return (
     <main className="p-6">
       <h1 className="text-2xl font-bold mb-4">My Watchlist</h1>
-      <table className="min-w-full bg-white text-black shadow-md rounded">
-        <thead>
+      <table className="min-w-full bg-transparent text-white shadow-md rounded">
+        <thead className="bg-gray-800">
           <tr>
             <th className="p-2 text-left">#</th>
             <th className="p-2 text-left">Coin</th>
@@ -44,24 +48,35 @@ export default function WatchlistPage() {
         </thead>
         <tbody>
           {coins.map((coin) => (
-            <tr key={coin.id} className="border-t">
+            <tr key={coin.id} className="border-t border-gray-700">
               <td className="p-2">{coin.market_cap_rank}</td>
               <td className="p-2">
-                <Link href={`/coin/${coin.id}`} className="hover:underline flex items-center gap-2">
+                <Link
+                  href={`/coin/${coin.id}`}
+                  className="hover:underline flex items-center gap-2 text-white"
+                >
                   <img src={coin.image} alt={coin.name} className="w-6 h-6" />
                   {coin.name} ({coin.symbol.toUpperCase()})
                 </Link>
               </td>
-              <td className="p-2">${coin.current_price.toLocaleString()}</td>
+              <td className="p-2">
+                ${coin.current_price.toLocaleString()}
+              </td>
               <td
                 className={`p-2 ${
-                  coin.price_change_percentage_24h > 0 ? "text-green-600" : "text-red-600"
+                  coin.price_change_percentage_24h > 0
+                    ? "text-green-400"
+                    : "text-red-400"
                 }`}
               >
                 {coin.price_change_percentage_24h.toFixed(2)}%
               </td>
-              <td className="p-2">${coin.market_cap.toLocaleString()}</td>
-              <td className="p-2">${coin.total_volume.toLocaleString()}</td>
+              <td className="p-2">
+                ${coin.market_cap.toLocaleString()}
+              </td>
+              <td className="p-2">
+                ${coin.total_volume.toLocaleString()}
+              </td>
             </tr>
           ))}
         </tbody>
