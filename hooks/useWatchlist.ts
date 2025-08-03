@@ -1,27 +1,22 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export function useWatchlist() {
   const [watchlist, setWatchlist] = useState<string[]>([]);
 
   useEffect(() => {
     const stored = localStorage.getItem("watchlist");
-    if (stored) {
-      setWatchlist(JSON.parse(stored));
-    }
+    if (stored) setWatchlist(JSON.parse(stored));
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem("watchlist", JSON.stringify(watchlist));
-  }, [watchlist]);
-
-  const toggleWatchlist = (id: string) => {
-    setWatchlist((prev) =>
-      prev.includes(id) ? prev.filter((coinId) => coinId !== id) : [...prev, id]
-    );
+  const toggleWatchlist = (coinId: string) => {
+    setWatchlist((prev) => {
+      const exists = prev.includes(coinId);
+      const updated = exists ? prev.filter((id) => id !== coinId) : [...prev, coinId];
+      localStorage.setItem("watchlist", JSON.stringify(updated));
+      return updated;
+    });
   };
 
-  const isInWatchlist = (id: string) => watchlist.includes(id);
-
-  return { watchlist, toggleWatchlist, isInWatchlist };
+  return { watchlist, toggleWatchlist };
 }
