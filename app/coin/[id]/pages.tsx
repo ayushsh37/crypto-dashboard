@@ -9,20 +9,21 @@ import { useWatchlist } from "@/hooks/useWatchlist";
 export default function CoinDetailPage() {
   const { id } = useParams() as { id: string };
   const { toggleWatchlist, isInWatchlist } = useWatchlist();
+
   const [coin, setCoin] = useState<CoinDetail | null>(null);
   const [chartData, setChartData] = useState<number[][]>([]);
-  const [days, setDays] = useState(7);
+  const [days, setDays] = useState<number>(7);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    if (!id) return;
     setLoading(true);
     Promise.all([getCoinDetails(id), getCoinMarketChart(id, days)])
-      .then(([details, chart]) => {
-        setCoin(details);
+      .then(([coinDetails, chart]) => {
+        setCoin(coinDetails);
         setChartData(chart.prices);
-        setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .finally(() => setLoading(false));
   }, [id, days]);
 
   if (loading) return <p className="p-6">Loading...</p>;
@@ -31,8 +32,8 @@ export default function CoinDetailPage() {
   return (
     <main className="p-6">
       <div className="flex items-center gap-4">
-        <img src={coin.image.small} alt={coin.name} className="w-10 h-10" />
-        <h1 className="text-2xl font-bold">
+        <img src={coin.image.small} alt={coin.name} className="w-12 h-12" />
+        <h1 className="text-3xl font-bold">
           {coin.name} ({coin.symbol.toUpperCase()})
         </h1>
         <button
@@ -52,6 +53,7 @@ export default function CoinDetailPage() {
         <p>Total Supply: {coin.market_data.total_supply?.toLocaleString() ?? "N/A"}</p>
       </div>
 
+      {/* Chart Section */}
       <div className="mt-6">
         <div className="flex gap-4 mb-4">
           {[1, 7, 30, 90].map((d) => (

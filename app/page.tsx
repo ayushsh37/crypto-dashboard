@@ -77,7 +77,7 @@ export default function HomePage() {
         >
           Previous
         </button>
-        <span className="px-4 py-2 border rounded bg-gray-100">Page {page}</span>
+        <span className="px-4 py-2 border rounded voilet-100">Page {page}</span>
         <button
           onClick={() => setPage((p) => p + 1)}
           className="px-4 py-2 border rounded"
