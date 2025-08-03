@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { getCoinDetails, getCoinMarketChart } from "@/utils/api";
 import { CoinDetail } from "@/types/coin";
-import PriceChart from "@/components/Chart";
+import PriceChart from "@/components/PriceChart";
 import { useWatchlist } from "@/hooks/useWatchlist";
 
 export default function CoinDetailPage() {
